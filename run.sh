@@ -1,1 +1,2 @@
-./.venv/bin/python -m uvicorn app.main:app --reload # --host $HOST --port $PORT 
+source .venv/Scripts/activate   
+uvicorn app.main:app --reload 

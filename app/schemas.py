@@ -1,6 +1,6 @@
-from typing import List, Annotated
+from typing import List, Annotated, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, constr, condecimal
 
 
 class ProductResponse(BaseModel):
@@ -38,3 +38,43 @@ class CategoryCreate(BaseModel):
 class CategoryUpdate(BaseModel):
     name: Annotated[str, Field(None, min_length=2, max_length=100)]
     description: Annotated[str, Field(None, max_length=500)]
+
+
+class ProductUpdateRequest(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    price: Optional[float] = None
+    in_stock: Optional[bool] = None
+    category_id: Optional[int] = None
+
+
+class PaginatedProductsResponse(BaseModel):
+    total: int
+    limit: int
+    offset: int
+    items: List[ProductResponse]
+
+
+
+class ProductsCountResponse(BaseModel):
+    total: int
+    in_stock: int
+    out_of_stock: int
+
+
+class ProductSummary(BaseModel):
+    id: int
+    name: str
+    price: float
+
+
+class ProductsStatisticsResponse(BaseModel):
+    total_products: int
+    total_categories: int
+    in_stock_count: int
+    out_of_stock_count: int
+    average_price: Optional[float]
+    min_price: Optional[float]
+    max_price: Optional[float]
+    most_expensive_product: Optional[ProductSummary]
+    cheapest_product: Optional[ProductSummary]
