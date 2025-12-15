@@ -2,13 +2,15 @@ from typing import List, Annotated
 
 from fastapi.routing import APIRouter
 from fastapi import HTTPException, Path, Body, Depends, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session , joinedload
 
-from ..schemas import CategoryReponse, CategoryCreate, CategoryUpdate
+from ..schemas import CategoryReponse, CategoryCreate, CategoryUpdate , ProductResponse
 from ..database import get_db
 from ..models import Category
+from ..models import Product
 
 router = APIRouter(
+    prefix=["\products"],
     tags=['Categories']
 )
 
@@ -100,3 +102,26 @@ def delete_category(
         "message": "Category deleted successfully"
     }
     
+
+
+@router.get('/{category_id}',  response_model=List[CategoryReponse])
+def get_all_products(
+    session: Annotated[Session, Depends(get_db)]
+):
+    products = (session.query(Product).options(joinedload(Product.category)).all())
+    return products
+
+
+@router.get("/{product_id}", response_model=ProductResponse,status_code=status.HTTP_200_OK)
+def get_product_by_id(
+    product_id: Annotated[int, Path(ge=1)],
+    session: Annotated[Session, Depends(get_db)]
+):
+    product = ( session.query(Product) .options(joinedload(Product.category))
+        .filter(Product.id == product_id).first())
+
+    if not product:
+        raise HTTPException( status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Product with id {product_id} not found")
+
+    return product
